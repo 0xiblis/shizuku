@@ -73,7 +73,7 @@ class WatchdogService : Service() {
         val channel = NotificationChannel(
             channelId,
             channelName,
-            NotificationManager.IMPORTANCE_LOW
+            NotificationManager.IMPORTANCE_DEFAULT
         )
         val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.createNotificationChannel(channel)
@@ -89,22 +89,10 @@ class WatchdogService : Service() {
             this, 0, launchIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val stopIntent = Intent(this, WatchdogService::class.java).apply {
-            action = "ACTION_STOP_SERVICE"
-        }
-        val stopPendingIntent = PendingIntent.getService(
-            this, 1, stopIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
         return NotificationCompat.Builder(this, channelId)
             .setContentTitle(getString(R.string.watchdog_running))
             .setSmallIcon(R.drawable.ic_system_icon)
             .setContentIntent(launchPendingIntent)
-            .addAction(
-                R.drawable.ic_close_24,
-                getString(R.string.watchdog_turn_off),
-                stopPendingIntent
-            )
             .setOngoing(true)
             .build()
     }
@@ -121,11 +109,6 @@ class WatchdogService : Service() {
         )
         nm.createNotificationChannel(channel)
 
-        val learnMoreIntent = Intent(Intent.ACTION_VIEW).apply {
-            setData(Uri.parse("https://github.com/thedjchi/Shizuku/wiki#shizuku-keeps-stopping-randomly"))
-        }
-        val learnMorePendingIntent = PendingIntent.getActivity(this, 0, learnMoreIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-
         val disableIntent = SettingsPage.Notifications.NotificationChannel.buildIntent(applicationContext)
         val disablePendingIntent = PendingIntent.getActivity(this, 0, disableIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
 
@@ -133,7 +116,6 @@ class WatchdogService : Service() {
             .setContentTitle(getString(R.string.watchdog_shizuku_crashed_title))
             .setContentText(getString(R.string.watchdog_shizuku_crashed_text))
             .setSmallIcon(R.drawable.ic_system_icon)
-            .setContentIntent(learnMorePendingIntent)
             .setAutoCancel(true)
             .addAction(0, getString(R.string.watchdog_shizuku_crashed_action_turn_off_alerts), disablePendingIntent)
             .build()

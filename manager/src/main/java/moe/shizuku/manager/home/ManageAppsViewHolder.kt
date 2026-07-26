@@ -5,7 +5,6 @@ import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import moe.shizuku.manager.Helps
 import moe.shizuku.manager.R
 import moe.shizuku.manager.databinding.HomeItemContainerBinding
 import moe.shizuku.manager.databinding.HomeManageAppsItemBinding
@@ -41,7 +40,7 @@ class ManageAppsViewHolder(private val binding: HomeManageAppsItemBinding, root:
             title.setText(R.string.home_app_management_title)
             summary.text = context.getString(
                 R.string.home_status_service_not_running,
-                context.getString(R.string.app_name)
+                context.getString(R.string.shizuku)
             )
         } else {
             itemView.isEnabled = true

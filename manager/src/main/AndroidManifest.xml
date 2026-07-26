@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <!-- Android 17 (SDK 37): local network access is gated behind these permissions;
          required for mDNS discovery used by wireless ADB pairing and for the
          privileged server to reach loopback. -->
@@ -22,8 +23,6 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
-    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
-    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <uses-permission
         android:name="android.permission.WRITE_SECURE_SETTINGS"
@@ -113,10 +112,6 @@
             android:name=".shell.ShellTutorialActivity"
             android:label="@string/home_terminal_title" />
         <activity
-            android:name=".stealth.StealthTutorialActivity"
-            android:label="@string/home_stealth_title"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
             android:name=".settings.SettingsActivity"
             android:exported="false"
             android:label="@string/settings_title">
@@ -127,13 +122,6 @@
         <activity
             android:name=".starter.StarterActivity"
             android:label="@string/starter" />
-        <activity
-            android:name=".settings.BugReportDialogActivity"
-            android:theme="@style/Theme.App.DialogHost"
-            android:taskAffinity=""
-            android:excludeFromRecents="true"
-            android:launchMode="singleTask"
-            android:exported="false" />
         <activity
             android:name=".authorization.RequestPermissionActivity"
             android:directBootAware="true"

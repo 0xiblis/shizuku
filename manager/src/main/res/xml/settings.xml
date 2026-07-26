@@ -39,27 +39,6 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:key="category_language"
-        android:title="@string/settings_language">
-
-        <rikka.preference.SimpleMenuPreference
-            android:defaultValue="SYSTEM"
-            android:key="language"
-            android:summary="%s"
-            android:title="@string/settings_language" />
-
-        <Preference
-            style="?preferenceInformationStyle"
-            android:key="translation_contributors"
-            android:title="@string/settings_translation_contributors" />
-
-        <Preference
-            android:key="translation"
-            android:title="@string/settings_translation" />
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
         android:key="category_ui"
         android:title="@string/settings_user_interface">
 
@@ -82,29 +61,14 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:key="category_support"
-        android:title="@string/settings_support">
-
-        <moe.shizuku.manager.settings.IntegerSimpleMenuPreference
-            android:entries="@array/update_mode"
-            android:entryValues="@array/update_mode_value"
-            android:key="update_mode"
-            android:summary="%s"
-            android:title="@string/check_for_updates" />
-
-        <Preference
-            android:key="help"
-            android:title="@string/settings_help" />
-
-        <Preference
-            android:key="report_bug"
-            android:title="@string/settings_report_bug" />
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
         android:key="category_advanced"
         android:title="@string/settings_advanced">
+
+        <SwitchPreferenceCompat
+            android:key="show_advanced"
+            android:title="@string/settings_advanced_show_title"
+            android:summary="@string/settings_advanced_show_summary"
+            android:defaultValue="false" />
 
         <SwitchPreferenceCompat
             android:key="legacy_pairing"

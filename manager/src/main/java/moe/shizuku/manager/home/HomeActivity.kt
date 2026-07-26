@@ -4,8 +4,15 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.FileProvider
+import moe.shizuku.manager.utils.UpdateChecker
 import android.os.Bundle
 import android.os.Process
+import java.io.File
 import android.text.method.LinkMovementMethod
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -22,18 +29,15 @@ import moe.shizuku.manager.ShizukuSettings
 import moe.shizuku.manager.adb.AdbPairingService
 import moe.shizuku.manager.app.AppBarActivity
 import moe.shizuku.manager.app.SnackbarHelper
-import moe.shizuku.manager.databinding.AboutDialogBinding
 import moe.shizuku.manager.databinding.HomeActivityBinding
 import moe.shizuku.manager.home.showAccessibilityDialog
 import moe.shizuku.manager.ktx.toHtml
 import moe.shizuku.manager.management.AppsViewModel
 import moe.shizuku.manager.settings.SettingsActivity
 import moe.shizuku.manager.utils.AppIconCache
-import moe.shizuku.manager.utils.CustomTabsHelper
 import moe.shizuku.manager.utils.EnvironmentUtils
 import moe.shizuku.manager.utils.SettingsHelper
 import moe.shizuku.manager.utils.ShizukuStateMachine
-import moe.shizuku.manager.utils.UpdateHelper
 import rikka.core.content.asActivity
 import rikka.core.ktx.unsafeLazy
 import rikka.lifecycle.Status
@@ -46,7 +50,37 @@ abstract class HomeActivity : AppBarActivity() {
 
     private val homeModel: HomeViewModel by viewModels()
     private val appsModel: AppsViewModel by viewModels()
-    private val adapter by unsafeLazy { HomeAdapter(homeModel, appsModel, lifecycleScope) }
+    private val adapter by unsafeLazy {
+        HomeAdapter(homeModel, appsModel, lifecycleScope,
+            onUpdateClick = { checkUpdate() },
+            onSettingsClick = { startActivity(Intent(this, SettingsActivity::class.java)) },
+            onAboutClick = {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/symbuzzer/fork-Shizuku"))
+                startActivity(intent)
+            }
+        )
+    }
+
+    private val requestPermissionsLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+            // Permission result handled by the system
+        }
+
+    private fun checkAndRequestRequiredPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val permissions = arrayOf(
+                android.Manifest.permission.POST_NOTIFICATIONS,
+                android.Manifest.permission.NEARBY_WIFI_DEVICES
+            )
+            val missingPermissions = permissions.filter {
+                checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED
+            }.toTypedArray()
+
+            if (missingPermissions.isNotEmpty()) {
+                requestPermissionsLauncher.launch(missingPermissions)
+            }
+        }
+    }
 
     private val stateListener: (ShizukuStateMachine.State) -> Unit = {
         if (ShizukuStateMachine.isRunning()) {
@@ -59,6 +93,7 @@ abstract class HomeActivity : AppBarActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setTitle("${getString(R.string.app_name)} v${moe.shizuku.manager.BuildConfig.VERSION_NAME}")
 
         val binding = HomeActivityBinding.inflate(layoutInflater, rootView, true)
 
@@ -102,24 +137,6 @@ abstract class HomeActivity : AppBarActivity() {
             }
         }
 
-        lifecycleScope.launch {
-            if (UpdateHelper.isCheckForUpdatesEnabled() && UpdateHelper.isNewUpdateAvailable()) {
-                SnackbarHelper.show(
-                    this@HomeActivity,
-                    binding.root,
-                    msg = getString(R.string.snackbar_update_available),
-                    duration = Snackbar.LENGTH_INDEFINITE,
-                    actionText = getString(R.string.snackbar_action_update),
-                    action = {
-                        lifecycleScope.launch {
-                            UpdateHelper.update()
-                        }
-                    }
-                )
-                UpdateHelper.updateLastPromptedVersion()
-            }
-        }
-
         val recyclerView = binding.list
         recyclerView.adapter = adapter
         recyclerView.fixEdgeEffect()
@@ -134,6 +151,8 @@ abstract class HomeActivity : AppBarActivity() {
 
         recyclerView.addItemSpacing(top = itemSpacing, bottom = itemSpacing)
         recyclerView.addEdgeSpacing(top = edgeSpacingV, bottom = edgeSpacingV, left = edgeSpacingH, right = edgeSpacingH)
+
+        checkAndRequestRequiredPermissions()
 
         ShizukuStateMachine.addListener(stateListener)
     }
@@ -187,69 +206,97 @@ abstract class HomeActivity : AppBarActivity() {
         super.onDestroy()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.main, menu)
-        return true
-    }
+    private fun checkUpdate() {
+        if (!UpdateChecker.isNetworkAvailable(this)) {
+            MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.error)
+                .setMessage(R.string.update_check_failed)
+                .setPositiveButton(android.R.string.ok, null)
+                .show()
+            return
+        }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.action_about -> {
-                val binding = AboutDialogBinding.inflate(LayoutInflater.from(this), null, false)
-                binding.sourceCode.movementMethod = LinkMovementMethod.getInstance()
-                binding.sourceCode.text = getString(
-                    R.string.about_view_source_code,
-                    "<b><a href=\"https://github.com/thedjchi/Shizuku\">GitHub</a></b>"
-                ).toHtml()
-                binding.icon.setImageBitmap(
-                    AppIconCache.getOrLoadBitmap(
-                        this,
-                        applicationInfo,
-                        Process.myUid() / 100000,
-                        resources.getDimensionPixelOffset(R.dimen.default_app_icon_size)
-                    )
-                )
-                binding.versionName.text = packageManager.getPackageInfo(packageName, 0).versionName
+        val progressDialog = MaterialAlertDialogBuilder(this)
+            .setMessage(R.string.update_checking)
+            .setCancelable(false)
+            .show()
 
-                binding.btnUpdate.setOnClickListener {
-                    lifecycleScope.launch {
-                        UpdateHelper.checkAndInstallUpdates()
-                    }
-                }
+        lifecycleScope.launch {
+            val result = UpdateChecker.checkUpdate(moe.shizuku.manager.BuildConfig.VERSION_NAME)
+            progressDialog.dismiss()
 
-                binding.btnDonate.setOnClickListener {
-                    CustomTabsHelper.launchUrlOrCopy(this, "https://www.buymeacoffee.com/thedjchi")
-                }
-
-                val dialog = MaterialAlertDialogBuilder(this)
-                    .setView(binding.root)
-                    .create()
-
-                binding.btnClose.setOnClickListener {
-                    dialog.dismiss()
-                }
-                
-                dialog.show()
-                true
-            }
-            R.id.action_stop -> {
-                if (ShizukuStateMachine.isRunning()) {
-                    MaterialAlertDialogBuilder(this)
-                        .setMessage(R.string.dialog_stop_message)
-                        .setPositiveButton(android.R.string.ok) { _: DialogInterface?, _: Int ->
-                            ShizukuStateMachine.set(ShizukuStateMachine.State.STOPPING)
-                            runCatching { Shizuku.exit() }
+            when (result) {
+                is UpdateChecker.UpdateResult.NewVersion -> {
+                    MaterialAlertDialogBuilder(this@HomeActivity)
+                        .setTitle(R.string.action_update)
+                        .setMessage(R.string.update_available)
+                        .setPositiveButton(R.string.update_download) { _, _ ->
+                            downloadAndUpdate(result.downloadUrl)
                         }
                         .setNegativeButton(android.R.string.cancel, null)
                         .show()
                 }
-                true
+                is UpdateChecker.UpdateResult.NoUpdate -> {
+                    MaterialAlertDialogBuilder(this@HomeActivity)
+                        .setTitle(R.string.action_update)
+                        .setMessage(R.string.update_not_available)
+                        .setPositiveButton(android.R.string.ok, null)
+                        .show()
+                }
+                is UpdateChecker.UpdateResult.Error -> {
+                    MaterialAlertDialogBuilder(this@HomeActivity)
+                        .setTitle(R.string.error)
+                        .setMessage(R.string.update_check_failed)
+                        .setPositiveButton(android.R.string.ok, null)
+                        .show()
+                }
             }
-            R.id.action_settings -> {
-                startActivity(Intent(this, SettingsActivity::class.java))
-                true
+        }
+    }
+
+    private fun downloadAndUpdate(downloadUrl: String) {
+        val downloadDialog = MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.update_download)
+            .setMessage(getString(R.string.update_downloading_progress, 0))
+            .setCancelable(false)
+            .show()
+
+        lifecycleScope.launch {
+            val targetFile = File(externalCacheDir, "update.apk")
+            val success = UpdateChecker.downloadApk(this@HomeActivity, downloadUrl, targetFile) { progress ->
+                downloadDialog.setMessage(getString(R.string.update_downloading_progress, progress))
             }
-            else -> super.onOptionsItemSelected(item)
+
+            downloadDialog.dismiss()
+
+            if (success) {
+                SnackbarHelper.show(this@HomeActivity, rootView, getString(R.string.update_download_finished), Snackbar.LENGTH_SHORT)
+                installApk(targetFile)
+            } else {
+                MaterialAlertDialogBuilder(this@HomeActivity)
+                    .setTitle(R.string.error)
+                    .setMessage(R.string.update_download_failed)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show()
+            }
+        }
+    }
+
+    private fun installApk(file: File) {
+        val uri = FileProvider.getUriForFile(this, "${moe.shizuku.manager.BuildConfig.APPLICATION_ID}.fileprovider", file)
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            setDataAndType(uri, "application/vnd.android.package-archive")
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        try {
+            startActivity(intent)
+        } catch (e: Exception) {
+            MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.error)
+                .setMessage(e.message)
+                .setPositiveButton(android.R.string.ok, null)
+                .show()
         }
     }
 

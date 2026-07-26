@@ -7,12 +7,10 @@ import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
 import kotlin.math.roundToInt
-import moe.shizuku.manager.Helps
 import moe.shizuku.manager.R
 import moe.shizuku.manager.app.AppBarActivity
 import moe.shizuku.manager.databinding.TerminalTutorialActivityBinding
 import moe.shizuku.manager.ktx.toHtml
-import moe.shizuku.manager.utils.CustomTabsHelper
 import rikka.compatibility.DeviceCompatibility
 import rikka.html.text.HtmlCompat
 import rikka.insets.*
@@ -103,7 +101,7 @@ class ShellTutorialActivity : AppBarActivity() {
             summary1.text = getString(R.string.terminal_tutorial_1_description, shName, dexName)
                 .toHtml(HtmlCompat.FROM_HTML_OPTION_TRIM_WHITESPACE)
 
-            text2.text = getString(R.string.terminal_tutorial_2, shName).toHtml()
+            text2.text = getString(R.string.terminal_tutorial_2).toHtml()
             command2.text = "cp /sdcard/chosen-folder/* /data/data/terminal.package.name/files"
             summary2.text = getString(R.string.terminal_tutorial_2_description, shName, shName, ".bashrc").toHtml()
 
@@ -111,7 +109,7 @@ class ShellTutorialActivity : AppBarActivity() {
             command3.text = "sh /path/to/$SH_NAME"
 
             button1.setOnClickListener { openDocumentsTree.launch(null) }
-            button2.setOnClickListener { v: View -> CustomTabsHelper.launchUrlOrCopy(v.context, Helps.RISH.get()) }
+            button2.visibility = View.GONE
         }
     }
 }

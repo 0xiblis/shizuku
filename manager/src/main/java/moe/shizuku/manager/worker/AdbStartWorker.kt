@@ -35,12 +35,19 @@ import moe.shizuku.manager.adb.AdbStarter
 import moe.shizuku.manager.receiver.ShizukuReceiverStarter
 import moe.shizuku.manager.receiver.ShizukuReceiverStarter.WorkerState
 import moe.shizuku.manager.receiver.ShizukuReceiverStarter.updateNotification
-import moe.shizuku.manager.settings.BugReportDialogActivity
 import moe.shizuku.manager.starter.Starter
 import moe.shizuku.manager.utils.EnvironmentUtils
 import moe.shizuku.manager.utils.ShizukuStateMachine
 
 class AdbStartWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
+
+    override suspend fun getForegroundInfo(): ForegroundInfo {
+        return ForegroundInfo(
+            ShizukuReceiverStarter.NOTIFICATION_ID,
+            ShizukuReceiverStarter.buildNotification(applicationContext, applicationContext.getString(R.string.wadb_notification_title))
+        )
+    }
+
     override suspend fun doWork(): Result {
         try {
             updateNotification(
@@ -70,9 +77,21 @@ class AdbStartWorker(context: Context, params: WorkerParameters) : CoroutineWork
                 fun startDiscoveryWithTimeout() {
                     adbMdns.start()
                     timeoutJob?.cancel()
-                    timeoutJob = launch {
-                        delay(15_000)
-                        close(TimeoutException("Timed out during mDNS port discovery"))
+                    timeoutJob = launch(Dispatchers.IO) {
+                        try {
+                            withTimeout(15_000) {
+                                // Wait for MDNS to find port (it will trySend to callbackFlow)
+                                delay(15_000)
+                            }
+                        } catch (e: Exception) {
+                            // Fallback scan if MDNS fails or times out
+                            val scannedPort = scanLocalAdbPorts()
+                            if (scannedPort > 0) {
+                                trySend(scannedPort)
+                            } else {
+                                close(TimeoutException("Timed out during mDNS port discovery and fallback scan"))
+                            }
+                        }
                     }
                 }
 
@@ -168,32 +187,44 @@ class AdbStartWorker(context: Context, params: WorkerParameters) : CoroutineWork
         }
     }
 
+    private fun scanLocalAdbPorts(): Int {
+        val port = EnvironmentUtils.getAdbTcpPort()
+        if (port > 0) return port
+
+        val commonPorts = listOf(5555, 3333, 4444)
+        for (p in commonPorts) {
+            if (isAdbPort(p)) return p
+        }
+        return -1
+    }
+
+    private fun isAdbPort(port: Int): Boolean {
+        return try {
+            java.net.Socket().apply {
+                connect(java.net.InetSocketAddress("127.0.0.1", port), 500)
+            }.use { true }
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     private fun showErrorNotification(context: Context, e: Exception) {
         val channel = NotificationChannel(
             CHANNEL_ID,
             context.getString(R.string.wadb_notification_title),
-            NotificationManager.IMPORTANCE_LOW
+            NotificationManager.IMPORTANCE_DEFAULT
         )
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         nm.createNotificationChannel(channel)
 
         val nb = NotificationCompat.Builder(context, CHANNEL_ID)
 
-        val msgNotif = "$e. ${context.getString(R.string.wadb_error_notify_dev)}"
-
-        val intent = Intent(context, BugReportDialogActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }
-        val pendingIntent = PendingIntent.getActivity(
-            context, 0, intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
+        val msgNotif = e.toString()
 
         val notification = nb
             .setSmallIcon(R.drawable.ic_system_icon)
             .setContentTitle(context.getString(R.string.wadb_error_title))
             .setContentText(msgNotif)
-            .setContentIntent(pendingIntent)
             .setSilent(true)
             .setStyle(NotificationCompat.BigTextStyle().bigText(msgNotif))
             .build()
@@ -202,14 +233,18 @@ class AdbStartWorker(context: Context, params: WorkerParameters) : CoroutineWork
     }
 
     companion object {
-        fun enqueue(context: Context) {
+        fun enqueue(context: Context, force: Boolean = false) {
             val cb = Constraints.Builder()
-            if (EnvironmentUtils.isWifiRequired())
-                cb.setRequiredNetworkType(NetworkType.UNMETERED)
+            
+            if (!force && EnvironmentUtils.isWifiRequired()) {
+                cb.setRequiredNetworkType(NetworkType.CONNECTED)
+            }
+            
             val constraints = cb.build()
 
             val request = OneTimeWorkRequestBuilder<AdbStartWorker>()
                 .setConstraints(constraints)
+                .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
                 .build()
 
             WorkManager.getInstance(context).enqueueUniqueWork(
