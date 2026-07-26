@@ -45,8 +45,13 @@ object ShizukuReceiverStarter {
         } else if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.R || EnvironmentUtils.isTelevision() || EnvironmentUtils.getAdbTcpPort() > 0)
             && ShizukuSettings.getLastLaunchMode() == LaunchMethod.ADB) {
                 if (context.checkSelfPermission(WRITE_SECURE_SETTINGS) == PackageManager.PERMISSION_GRANTED) {
-                    AdbStartWorker.enqueue(context)
-                    updateNotification(context, WorkerState.AWAITING_WIFI)
+                    val wifiConnected = EnvironmentUtils.isWifiConnected()
+                    AdbStartWorker.enqueue(context, force = wifiConnected)
+                    if (!wifiConnected) {
+                        updateNotification(context, WorkerState.AWAITING_WIFI)
+                    } else {
+                        updateNotification(context, WorkerState.RUNNING)
+                    }
                 } else {
                     showPermissionErrorNotification(context)
                 }
@@ -59,7 +64,7 @@ object ShizukuReceiverStarter {
         val channel = NotificationChannel(
             CHANNEL_ID,
             context.getString(R.string.wadb_notification_title),
-            NotificationManager.IMPORTANCE_LOW
+            NotificationManager.IMPORTANCE_DEFAULT
         )
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         nm.createNotificationChannel(channel)
@@ -133,15 +138,10 @@ object ShizukuReceiverStarter {
         val channel = NotificationChannel(
             CHANNEL_ID,
             context.getString(R.string.wadb_notification_title),
-            NotificationManager.IMPORTANCE_LOW
+            NotificationManager.IMPORTANCE_DEFAULT
         )
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         nm.createNotificationChannel(channel)
-
-        val webpageIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/thedjchi/Shizuku/wiki#shizuku-isnt-starting-on-boot-for-me"))
-        val pendingWebpageIntent = PendingIntent.getActivity(
-            context, 0, webpageIntent, PendingIntent.FLAG_IMMUTABLE
-        )
 
         val msg = context.getString(R.string.wadb_permission_error_notification_content)
 
@@ -150,7 +150,6 @@ object ShizukuReceiverStarter {
             .setContentTitle(context.getString(R.string.wadb_permission_error_notification_title))
             .setContentText(msg)
             .setSilent(true)
-            .setContentIntent(pendingWebpageIntent)
             .setStyle(NotificationCompat.BigTextStyle().bigText(msg))
             .build()
 

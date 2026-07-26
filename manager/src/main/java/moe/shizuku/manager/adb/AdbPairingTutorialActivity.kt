@@ -4,7 +4,6 @@ import android.Manifest
 import android.app.AppOpsManager
 import android.app.ForegroundServiceStartNotAllowedException
 import android.app.NotificationManager
-import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -63,9 +62,7 @@ class AdbPairingTutorialActivity : AppBarActivity() {
 
     private fun syncNotificationEnabled() {
         binding.apply {
-            step1.isVisible = notificationEnabled
             step2.isVisible = notificationEnabled
-            step3.isVisible = notificationEnabled
             network.isVisible = notificationEnabled
             notification.isVisible = notificationEnabled
             notificationDisabled.isGone = notificationEnabled
