@@ -12,4 +12,4 @@
     android:descendantFocusability="afterDescendants"
     app:cardBackgroundColor="?colorSurfaceContainerLow"
     app:cardCornerRadius="28dp"
-    app:contentPadding="24dp" />
+    app:contentPadding="0dp" />

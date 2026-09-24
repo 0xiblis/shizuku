@@ -46,6 +46,11 @@ import rikka.recyclerview.addItemSpacing
 import rikka.recyclerview.fixEdgeEffect
 import rikka.shizuku.Shizuku
 
+import android.graphics.Color
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
+
 abstract class HomeActivity : AppBarActivity() {
 
     private val homeModel: HomeViewModel by viewModels()
@@ -94,7 +99,17 @@ abstract class HomeActivity : AppBarActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //setTitle("${getString(R.string.app_name)} v${moe.shizuku.manager.BuildConfig.VERSION_NAME}")
-        setTitle("${getString(R.string.app_name)}")
+        //setTitle("${getString(R.string.app_name)}")
+        val title = SpannableString("Shizuku++")
+        title.setSpan(
+            ForegroundColorSpan(Color.parseColor("#afbdc4")),
+            0, 7, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        title.setSpan(
+            ForegroundColorSpan(Color.parseColor("#86949c")),
+            7, 9, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        setTitle(title)
 
         val binding = HomeActivityBinding.inflate(layoutInflater, rootView, true)
 

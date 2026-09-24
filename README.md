@@ -1,26 +1,24 @@
-# Shizuku++  
+____________________
 
-## What is Shizuku?
+<div align="center">
+
+# Shizuku++
+
+</div>
 
 An Android app that allows other apps to use system-level APIs that require adb/root privileges.
 
 ## Screenshots
 
-<img width="108" height="234" alt="main-stopped" src="https://github.com/user-attachments/assets/4cdbb5ac-55e2-47af-891c-2bd86165f346" />
-<img width="108" height="234" alt="main-running" src="https://github.com/user-attachments/assets/6e3ef91c-78e9-48fc-b70a-18bd85ee5a84" />
-<img width="108" height="290" alt="settings" src="https://github.com/user-attachments/assets/1253fc04-4da3-403e-a2c1-c0df61abffd0" />
+|`𝚞𝚒𝚍𝟸𝟶𝟶𝟶`|`𝚞𝚒𝚍𝟷𝟶𝟶𝟶`|
+|:-------:|:-------:|
+|<img width="1080" height="2400" alt="Screenshot_20260926_003758_Shizuku++" src="https://github.com/user-attachments/assets/bed021d7-337d-4643-a054-209061600d9b" />|<img width="1080" height="2400" alt="Screenshot_20260926_003725_Shizuku++" src="https://github.com/user-attachments/assets/99aeea6b-4f74-4731-a7e6-a7d6a9a3faee" />|
 
 ## Disclaimer
 
-This is a **FORK** of unofficial [Shizuku fork by symbuzzer](https://github.com/symbuzzer/fork-Shizuku).
-- If you are looking for the original Shizuku, please visit the [RikkaApps/Shizuku](https://github.com/RikkaApps/Shizuku) repository.
+This is a fork of unofficial shizuku by [symbuzzer](https://github.com/symbuzzer/fork-Shizuku). If you are looking for the original app, please visit the [RikkaApps](https://github.com/RikkaApps/Shizuku) repository.
 
 *Note: This is for my own use. Use it at your own risk.*
-
-## Download
-
-Get the [latest](https://github.com/0xiblis/shizuku/releases/latest) version.  
-All versions and changelogs are distributed via [GitHub Releases](https://github.com/symbuzzer/0xiblis/shizuku/releases).  
 
 ## How to install
 
@@ -30,6 +28,14 @@ All versions and changelogs are distributed via [GitHub Releases](https://github
 4- **Follow on-screen instructions.**  
 
 *Note: During the first setup and each reboot, the device should only be connected to a Wi-Fi network once.*
+
+## Added features by this fork
+
+* Support for launching Shizuku within other system users (like system UID 1000)
+* For use with privilege escalation exploits
+* Launch Shizuku with your exploit using `STARTER=$(pm path moe.shizuku.privileged.api | sed -E 's|^package:(.*/)[^/]+\.apk$|\1lib/arm64/libshizuku.so|') && $STARTER` (the .so file is actually an executable)
+* ...or hardcode the correct path to `/data/app/{pkgId}/lib/arm64/libshizuku.so` and launch it directly without using the shell pipeline above.
+* Features a persistent TCP socket/reverse shell mechanism initiated automatically upon execution of the native binary.
 
 ## Added features by symbuzzer
 
@@ -78,7 +84,7 @@ Shizuku takes user privacy very seriously.
 * Internet access is only used for wireless debugging connections
 * Only required permissions are declared
 
-### Permissions
+## Permissions
 
 * **INTERNET:** required for the wireless debugging start mode to work.
 * **ACCESS_NETWORK_STATE:** used to determine when Wi-Fi is available for background start via wireless debugging
