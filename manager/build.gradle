@@ -17,7 +17,7 @@ android {
         applicationId = "moe.shizuku.privileged.api"
         versionCode = rootProject.ext.versionCode
         versionName = rootProject.ext.versionName
-        resConfigs "en", "tr", "pt-rBR"
+        resConfigs "en"
         externalNativeBuild {
             cmake {
                 arguments = ["-DANDROID_STL=none"]
@@ -127,7 +127,7 @@ afterEvaluate {
 
 android.applicationVariants.configureEach { variant ->
     variant.outputs.configureEach {
-        outputFileName = "Shizuku-fork.apk"
+        outputFileName = "shizuku-v${variant.versionName}-${variant.name}.apk"
 
         variant.assembleProvider.get().doLast {
             def outDir = new File(rootDir, "out")

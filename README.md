@@ -1,5 +1,4 @@
-# Shizuku-fork [![Github All Releases](https://img.shields.io/github/downloads/symbuzzer/fork-Shizuku/total.svg)](https://github.com/symbuzzer/fork-Shizuku/releases)[![shields.io Stars](https://img.shields.io/github/stars/symbuzzer/fork-Shizuku?color=gr)](https://github.com/symbuzzer/fork-Shizuku/stargazers)  
-The new and easy-to-use Shizuku variant.  
+# Shizuku++  
 
 ## What is Shizuku?
 
@@ -13,22 +12,21 @@ An Android app that allows other apps to use system-level APIs that require adb/
 
 ## Disclaimer
 
-This is a **FORK** of [unofficial Shizuku fork by thedjchi](https://github.com/thedjchi/Shizuku).
+This is a **FORK** of unofficial [Shizuku fork by symbuzzer](https://github.com/symbuzzer/fork-Shizuku).
 - If you are looking for the original Shizuku, please visit the [RikkaApps/Shizuku](https://github.com/RikkaApps/Shizuku) repository.
-- If you are looking for the Shizuku fork that served as the base for this variant, please visit the [thedjchi/Shizuku](https://github.com/thedjchi/Shizuku) repository.
 
 *Note: This is for my own use. Use it at your own risk.*
 
 ## Download
 
-Get the [latest](https://github.com/symbuzzer/fork-Shizuku/releases/latest) version.  
-All versions and changelogs are distributed via [GitHub Releases](https://github.com/symbuzzer/fork-Shizuku/releases).  
+Get the [latest](https://github.com/0xiblis/shizuku/releases/latest) version.  
+All versions and changelogs are distributed via [GitHub Releases](https://github.com/symbuzzer/0xiblis/shizuku/releases).  
 
 ## How to install
 
 1- **Remove all Shizuku variants before installing and reboot the device.** Because, all of them uses same package names.  
 2- **Disable Play Protect before installation.** Because, offical Shizuku is already uploaded to Play Store and it has same package name but different signature. So Play Protect detects all variants of Shizuku as malicious.  
-3- **Download and install the [latest apk](https://github.com/symbuzzer/fork-Shizuku/releases/latest/download/Shizuku-fork.apk)**  
+3- **Download and install the [latest apk](https://github.com/0xiblis/shizuku/releases/latest/download/shizuku.apk)**  
 4- **Follow on-screen instructions.**  
 
 *Note: During the first setup and each reboot, the device should only be connected to a Wi-Fi network once.*
@@ -91,15 +89,6 @@ Shizuku takes user privacy very seriously.
 * **REQUEST_INSTALL_PACKAGES:** allows the app to install downloaded updates.
 * **WRITE_SECURE_SETTINGS:** used to toggle USB and wireless debugging in the background when starting/stopping Shizuku
 * **NEARBY_WIFI_DEVICES:** required for connecting device itself via wireless ADB
-
-## Translations
-Supported languages for now:  
-- EN
-- TR
-- PT *(thanks to [marciozomb13](https://github.com/symbuzzer/fork-Shizuku/issues?q=is%3Apr+author%3Amarciozomb13))* 
-  
-You can always add the language you want by sending a Pull Request.  
-Many of the translations were chicken-translated, so all except English and Turkish have been removed.  
 
 ## License
 
