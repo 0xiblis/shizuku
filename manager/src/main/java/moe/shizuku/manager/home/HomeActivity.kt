@@ -55,7 +55,7 @@ abstract class HomeActivity : AppBarActivity() {
             onUpdateClick = { checkUpdate() },
             onSettingsClick = { startActivity(Intent(this, SettingsActivity::class.java)) },
             onAboutClick = {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/symbuzzer/fork-Shizuku"))
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/0xiblis/shizuku"))
                 startActivity(intent)
             }
         )
@@ -93,7 +93,8 @@ abstract class HomeActivity : AppBarActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setTitle("${getString(R.string.app_name)} v${moe.shizuku.manager.BuildConfig.VERSION_NAME}")
+        //setTitle("${getString(R.string.app_name)} v${moe.shizuku.manager.BuildConfig.VERSION_NAME}")
+        setTitle("${getString(R.string.app_name)}")
 
         val binding = HomeActivityBinding.inflate(layoutInflater, rootView, true)
 
