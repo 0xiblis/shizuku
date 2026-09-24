@@ -2,6 +2,7 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     style="@style/Card.Large"
+    android:padding="24dp"
     android:background="?colorErrorContainer">
 
     <LinearLayout

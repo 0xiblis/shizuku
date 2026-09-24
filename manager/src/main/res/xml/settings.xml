@@ -26,6 +26,12 @@
             android:title="@string/settings_tcp_mode" 
             android:defaultValue="true" />
 
+        <SwitchPreferenceCompat
+            android:key="auto_start_adb"
+            android:title="@string/settings_auto_start_adb"
+            android:summary="@string/settings_auto_start_adb_summary"
+            android:defaultValue="false" />
+
         <EditTextPreference
             android:key="tcp_port"
             android:title="@string/settings_tcp_port"

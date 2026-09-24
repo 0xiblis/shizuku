@@ -27,6 +27,7 @@ public class ShizukuSettings {
         public static final String KEY_START_ON_BOOT = "start_on_boot";
         public static final String KEY_WATCHDOG = "watchdog";
         public static final String KEY_TCP_MODE = "tcp_mode";
+        public static final String KEY_AUTO_START_ADB = "auto_start_adb";
         public static final String KEY_TCP_PORT = "tcp_port";
         public static final String KEY_AUTO_DISABLE_USB_DEBUGGING = "auto_disable_usb_debugging";
         public static final String KEY_LANGUAGE = "language";
@@ -156,6 +157,14 @@ public class ShizukuSettings {
 
     public static void setTcpMode(boolean enable) {
         getPreferences().edit().putBoolean(Keys.KEY_TCP_MODE, enable).apply();
+    }
+
+    public static boolean getAutoStartAdb() {
+        return getPreferences().getBoolean(Keys.KEY_AUTO_START_ADB, false);
+    }
+
+    public static void setAutoStartAdb(boolean enable) {
+        getPreferences().edit().putBoolean(Keys.KEY_AUTO_START_ADB, enable).apply();
     }
 
     public static int getTcpPort() {

@@ -52,7 +52,10 @@ class ShizukuApplication : Application() {
         application = this
         appContext = applicationContext
         init(this)
-        AdbConnectivityManager.start(this)
+        //AdbConnectivityManager.start(this)
+        if (ShizukuSettings.getAutoStartAdb()) {
+            AdbConnectivityManager.start(this)
+        }
     }
 
 }

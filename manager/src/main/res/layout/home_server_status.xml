@@ -50,7 +50,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    style="@style/Card.Large">
+    style="@style/Card.Large"
+    android:background="@drawable/card_gradient"
+    android:padding="24dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -78,6 +80,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:duplicateParentState="true"
+                android:textColor="#151515"
                 tools:text="Running (version 10)" />
 
             <TextView
@@ -85,18 +88,36 @@
                 style="@style/CardSummary.Brief"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:duplicateParentState="true" />
+                android:duplicateParentState="true"
+                android:textColor="#454545" />
 
         </LinearLayout>
 
     </LinearLayout>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@android:id/button1"
-        style="@style/CardButton"
-        android:text="@string/stop"
-        android:visibility="gone"
-        app:icon="@drawable/ic_close_24"
-        tools:visibility="visible" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@android:id/button1"
+            style="@style/CardButton"
+            android:text="@string/stop"
+            android:visibility="gone"
+            app:icon="@drawable/ic_close_24"
+            tools:visibility="visible" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="end"
+            android:text="&lt;/xploit/&gt;"
+            android:textColor="#606060"
+            android:textSize="14sp" />
+
+    </LinearLayout>
 
 </LinearLayout>

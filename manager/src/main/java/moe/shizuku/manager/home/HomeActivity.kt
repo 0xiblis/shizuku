@@ -46,6 +46,16 @@ import rikka.recyclerview.addItemSpacing
 import rikka.recyclerview.fixEdgeEffect
 import rikka.shizuku.Shizuku
 
+import android.graphics.Color
+import android.view.Gravity
+import android.view.ViewGroup
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
+import android.widget.LinearLayout
+import android.widget.TextView
+import androidx.appcompat.widget.Toolbar
+
 abstract class HomeActivity : AppBarActivity() {
 
     private val homeModel: HomeViewModel by viewModels()
@@ -94,7 +104,65 @@ abstract class HomeActivity : AppBarActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //setTitle("${getString(R.string.app_name)} v${moe.shizuku.manager.BuildConfig.VERSION_NAME}")
-        setTitle("${getString(R.string.app_name)}")
+        //setTitle("${getString(R.string.app_name)}")
+        /*val title = SpannableString("Shizuku++")
+        title.setSpan(
+            ForegroundColorSpan(Color.parseColor("#afbdc4")),
+            0, 7, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        title.setSpan(
+            ForegroundColorSpan(Color.parseColor("#86949c")),
+            7, 9, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        setTitle(title)*/
+
+        val titleLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            layoutParams = Toolbar.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        }
+        val title = SpannableString("Shizuku++")
+        title.setSpan(
+            ForegroundColorSpan(Color.parseColor("#afbdc4")),
+            0, 7,
+            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        title.setSpan(
+            ForegroundColorSpan(Color.parseColor("#86949c")),
+            7, 9,
+            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        val titleView = TextView(this).apply {
+            text = title
+            textSize = 24f
+            gravity = Gravity.CENTER
+        }
+        /*val subtitleView = TextView(this).apply {
+            text = "by simplythebest"
+            textSize = 13f
+            gravity = Gravity.CENTER
+            setTextColor(Color.parseColor("#86949c"))
+            alpha = 0.6f
+        }*/
+        val subtitleView = TextView(this).apply {
+            text = "</by simplythebest/>"
+            textSize = 11f
+            gravity = Gravity.CENTER
+            setTextColor(Color.parseColor("#86949c"))
+            alpha = 0.4f
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin = -12
+            }
+        }
+        titleLayout.addView(titleView)
+        titleLayout.addView(subtitleView)
+        findViewById<Toolbar>(R.id.toolbar).addView(titleLayout)
 
         val binding = HomeActivityBinding.inflate(layoutInflater, rootView, true)
 

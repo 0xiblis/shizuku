@@ -66,6 +66,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
     private lateinit var startOnBootPreference: TwoStatePreference
     private lateinit var watchdogPreference: TwoStatePreference
     private lateinit var tcpModePreference: TwoStatePreference
+    private lateinit var autoStartAdbPreference: TwoStatePreference
     private lateinit var tcpPortPreference: EditTextPreference
     private lateinit var nightModePreference: IntegerSimpleMenuPreference
     private lateinit var blackNightThemePreference: TwoStatePreference
@@ -95,6 +96,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
         startOnBootPreference = findPreference(KEY_START_ON_BOOT)!!
         watchdogPreference = findPreference(KEY_WATCHDOG)!!
         tcpModePreference = findPreference(KEY_TCP_MODE)!!
+        autoStartAdbPreference = findPreference(KEY_AUTO_START_ADB)!!
         tcpPortPreference = findPreference(KEY_TCP_PORT)!!
         nightModePreference = findPreference(KEY_NIGHT_MODE)!!
         blackNightThemePreference = findPreference(KEY_BLACK_NIGHT_THEME)!!
@@ -193,7 +195,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
                             icon = maybeGetRestartIcon(KEY_TCP_MODE)
                             tcpPortPreference.isVisible = newValue && showAdvancedPreference.isChecked
                         }
-                        
+
                         if (!newValue && !ShizukuStateMachine.isRunning() && needsRestart(KEY_TCP_MODE, newValue)) {
                             promptStopTcp { applyChange() }
                         } else maybePromptRestart (KEY_TCP_MODE, newValue) { applyChange() }
@@ -205,6 +207,18 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
                 isChecked = true
             } else {
                 isVisible = false
+            }
+        }
+
+        autoStartAdbPreference.apply {
+            isChecked = ShizukuSettings.getAutoStartAdb()
+
+            setOnPreferenceChangeListener { _, newValue ->
+                if (newValue is Boolean) {
+                    ShizukuSettings.setAutoStartAdb(newValue)
+                    isChecked = newValue
+                }
+                false
             }
         }
 
@@ -348,7 +362,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
     private fun maybeGetRestartIcon(setting: String): Drawable? {
         val context = requireContext()
         if (!needsRestart(setting)) return null
-        
+
         val icon = context.getDrawable(R.drawable.ic_server_restart)
         return tint(icon)
     }
@@ -413,7 +427,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
             onResult(true)
             return
         }
-            
+
         lifecycleScope.launch {
             val result = suspendCancellableCoroutine<Boolean> { continuation ->
                 batteryOptimizationContinuation = continuation

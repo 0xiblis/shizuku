@@ -3,7 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    style="@style/Card.Small">
+    style="@style/Card.Small"
+    android:padding="24dp">
 
     <ImageView
         android:id="@android:id/icon"

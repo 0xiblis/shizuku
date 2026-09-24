@@ -1,28 +1,30 @@
-# Shizuku++  
+____________________
 
-## What is Shizuku?
+<div align="center">
+
+# Shizuku++
+
+</div>
 
 An Android app that allows other apps to use system-level APIs that require adb/root privileges.
 
-## Screenshots
+## 📸 Screenshots
 
-<img width="108" height="234" alt="main-stopped" src="https://github.com/user-attachments/assets/4cdbb5ac-55e2-47af-891c-2bd86165f346" />
-<img width="108" height="234" alt="main-running" src="https://github.com/user-attachments/assets/6e3ef91c-78e9-48fc-b70a-18bd85ee5a84" />
-<img width="108" height="290" alt="settings" src="https://github.com/user-attachments/assets/1253fc04-4da3-403e-a2c1-c0df61abffd0" />
+<div align="center">
 
-## Disclaimer
+|`𝚞𝚒𝚍𝟸𝟶𝟶𝟶`|`𝚞𝚒𝚍𝟷𝟶𝟶𝟶`|
+|:-------:|:-------:|
+|<img width="1080" height="2400" alt="1000871789" src="https://github.com/user-attachments/assets/90ff2eff-8b89-492a-8023-fb422e1f7df9" />|<img width="1080" height="2400" alt="1000871788" src="https://github.com/user-attachments/assets/c10d2e91-61ac-488f-a8af-d7167c761529" />|
 
-This is a **FORK** of unofficial [Shizuku fork by symbuzzer](https://github.com/symbuzzer/fork-Shizuku).
-- If you are looking for the original Shizuku, please visit the [RikkaApps/Shizuku](https://github.com/RikkaApps/Shizuku) repository.
+</div>
+
+## ⚠️ Disclaimer
+
+This is a fork of unofficial shizuku by [symbuzzer](https://github.com/symbuzzer/fork-Shizuku). If you are looking for the original app, please visit the [RikkaApps](https://github.com/RikkaApps/Shizuku) repository.
 
 *Note: This is for my own use. Use it at your own risk.*
 
-## Download
-
-Get the [latest](https://github.com/0xiblis/shizuku/releases/latest) version.  
-All versions and changelogs are distributed via [GitHub Releases](https://github.com/symbuzzer/0xiblis/shizuku/releases).  
-
-## How to install
+## ❓ How to install
 
 1- **Remove all Shizuku variants before installing and reboot the device.** Because, all of them uses same package names.  
 2- **Disable Play Protect before installation.** Because, offical Shizuku is already uploaded to Play Store and it has same package name but different signature. So Play Protect detects all variants of Shizuku as malicious.  
@@ -31,7 +33,16 @@ All versions and changelogs are distributed via [GitHub Releases](https://github
 
 *Note: During the first setup and each reboot, the device should only be connected to a Wi-Fi network once.*
 
-## Added features by symbuzzer
+## ✨ Added features by this fork
+
+* Support for launching Shizuku within other system users (like system UID 1000)
+* For use with privilege escalation exploits
+* Launch Shizuku with your exploit using `STARTER=$(pm path moe.shizuku.privileged.api | sed -E 's|^package:(.*/)[^/]+\.apk$|\1lib/arm64/libshizuku.so|') && $STARTER` (the .so file is actually an executable)
+* ...or hardcode the correct path to `/data/app/{pkgId}/lib/arm64/libshizuku.so` and launch it directly without using the shell pipeline above.
+* Features a persistent TCP socket/reverse shell mechanism initiated automatically upon execution of the native binary.
+* Integrated [WiFiList](https://github.com/zacharee/WiFiList) functionality for viewing saved WiFi passwords on Android 11 and later without root.
+
+## ✨ Added features by symbuzzer
 
 This variant of thedjchi's Shizuku includes some extra features over the unoffical thedjchi's forked version, such as:
 * **Fewer options, much easier to use:** Many options/features have been hidden and will only be shown when needed. Additionally, those I considered redundant have been removed entirely.
@@ -44,7 +55,7 @@ This variant of thedjchi's Shizuku includes some extra features over the unoffic
 * **Removed "Stealth mode" feature to allow the application to be published on any FOSS Repository in future.**
 * **Fixed Turkish and Portuguese translations.**
 
-## Added features by thedjchi
+## ✨ Added features by thedjchi
 
 thedjchi's original Shizuku version includes some extra features over the original version, such as:
 * **More robust "start on boot":** waits for a Wi-Fi connection before starting the Shizuku service
@@ -57,7 +68,7 @@ thedjchi's original Shizuku version includes some extra features over the origin
 * **MediaTek support:** fixes a critical bug in the original v13.6.0 which prevented Shizuku from working on MediaTek devices
 * And more!
 
-## Requirements
+## ☑️ Requirements
 
 **Minimum Version: Android 7+**
 - **Root mode:** Requires a rooted device
@@ -65,7 +76,7 @@ thedjchi's original Shizuku version includes some extra features over the origin
 - **PC mode:** Works on all devices
 - **Start on boot:** Available only when using Wireless Debugging or Root mode
 
-## Privacy
+## 🔒 Privacy
 
 Shizuku takes user privacy very seriously.
 
@@ -78,7 +89,7 @@ Shizuku takes user privacy very seriously.
 * Internet access is only used for wireless debugging connections
 * Only required permissions are declared
 
-### Permissions
+## 🔥 Permissions
 
 * **INTERNET:** required for the wireless debugging start mode to work.
 * **ACCESS_NETWORK_STATE:** used to determine when Wi-Fi is available for background start via wireless debugging
@@ -90,6 +101,6 @@ Shizuku takes user privacy very seriously.
 * **WRITE_SECURE_SETTINGS:** used to toggle USB and wireless debugging in the background when starting/stopping Shizuku
 * **NEARBY_WIFI_DEVICES:** required for connecting device itself via wireless ADB
 
-## License
+## 📃 License
 
 All code files in this project are licensed under [Apache 2.0](LICENSE)
