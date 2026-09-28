@@ -56,6 +56,8 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
 
+import moe.shizuku.manager.wifi.WifiActivity
+
 abstract class HomeActivity : AppBarActivity() {
 
     private val homeModel: HomeViewModel by viewModels()
@@ -67,6 +69,9 @@ abstract class HomeActivity : AppBarActivity() {
             onAboutClick = {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/0xiblis/shizuku"))
                 startActivity(intent)
+            },
+            onWifiClick = {
+                startActivity(Intent(this, WifiActivity::class.java))
             }
         )
     }
@@ -140,13 +145,6 @@ abstract class HomeActivity : AppBarActivity() {
             textSize = 24f
             gravity = Gravity.CENTER
         }
-        /*val subtitleView = TextView(this).apply {
-            text = "by simplythebest"
-            textSize = 13f
-            gravity = Gravity.CENTER
-            setTextColor(Color.parseColor("#86949c"))
-            alpha = 0.6f
-        }*/
         val subtitleView = TextView(this).apply {
             text = "</by simplythebest/>"
             textSize = 11f

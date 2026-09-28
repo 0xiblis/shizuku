@@ -160,6 +160,10 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".wifi.WifiActivity"
+            android:exported="false" />
+
         <service
             android:name=".adb.AdbPairingService"
             android:enabled="true"

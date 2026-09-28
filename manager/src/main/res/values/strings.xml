@@ -118,6 +118,13 @@
     <string name="terminal_tutorial_3">Open a shell with the following command:</string>
     <string name="rish_description"><![CDATA[With %1$s, you can run shell commands in any terminal app.]]></string>
 
+    <!-- WiFiList -->
+    <string name="wifi_title">WiFiList</string>
+    <string name="wifi_summary">View saved passwords</string>
+    <string name="wifi_shizuku_not_running">Shizuku is not running</string>
+    <string name="wifi_no_password">No password</string>
+    <string name="wifi_password_copied">Password copied to clipboard</string>
+
     <!-- Settings -->
     <string name="settings_title">Settings</string>
     <string name="settings_behavior">Behavior</string>
@@ -239,5 +246,5 @@
     <string name="dialog_requesting_legacy_message"><![CDATA[<b>%1$s</b> has modern Shizuku support, but it\'s requesting legacy Shizuku. This could because Shizuku is not running, please check in Shizuku app.<p>Legacy Shizuku has been deprecated since March 2019.]]></string>
     <string name="dialog_requesting_legacy_button_open_shizuku">Open Shizuku</string>
     <string name="wadb_notification_attempt_now">Attempt now</string>
-
+ 
 </resources>

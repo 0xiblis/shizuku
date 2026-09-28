@@ -21,7 +21,8 @@ class HomeAdapter(
     private val scope: CoroutineScope,
     private val onUpdateClick: () -> Unit,
     private val onSettingsClick: () -> Unit,
-    private val onAboutClick: () -> Unit
+    private val onAboutClick: () -> Unit,
+    private val onWifiClick: () -> Unit
 ) :
     IdBasedRecyclerViewAdapter(ArrayList()) {
 
@@ -44,6 +45,7 @@ class HomeAdapter(
         private const val ID_SETTINGS = 10L
         private const val ID_ABOUT = 11L
         private const val ID_FOOTER = 12L
+        private const val ID_WIFI = 13L
     }
 
     override fun onCreateCreatorPool(): IndexCreatorPool {
@@ -89,6 +91,17 @@ class HomeAdapter(
         if (showAdvanced) {
             addItem(AutomationViewHolder.CREATOR, null, ID_AUTOMATION)
         }
+
+        addItem(
+            HomeButtonViewHolder.CREATOR,
+            HomeButtonViewHolder.Data(
+                R.drawable.ic_wifi,
+                R.string.wifi_title,
+                R.string.wifi_summary,
+                onWifiClick
+            ),
+            ID_WIFI
+        )
 
         addItem(
             HomeButtonViewHolder.CREATOR,
