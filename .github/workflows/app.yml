@@ -24,8 +24,8 @@ jobs:
       attestations: write
       artifact-metadata: write
 
-    env:
-      KEYSTORE: ${{ secrets.KEYSTORE }}
+    #env:
+      #KEYSTORE: ${{ secrets.KEYSTORE }}
 
     outputs:
       versionName: ${{ steps.buildWithGradle.outputs.versionName }}
@@ -35,7 +35,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          ref: ${{ inputs.prerelease && 'beta' || 'remix' }}
+          #ref: ${{ inputs.prerelease && 'beta' || 'remix' }}
           submodules: 'recursive'
           fetch-depth: 0
 
@@ -45,21 +45,21 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Validate Signing Config
-        run: |
-          if [ "${{ inputs.debug }}" = "false" ] && [ "$KEYSTORE" = "" ]; then
-            echo "::error::Signing secrets not configured. Signing secrets are required for release builds."
-            exit 1
-          fi
+      #- name: Validate Signing Config
+        #run: |
+          #if [ "${{ inputs.debug }}" = "false" ] && [ "$KEYSTORE" = "" ]; then
+            #echo "::error::Signing secrets not configured. Signing secrets are required for release builds."
+            #exit 1
+          #fi
 
-      - name: Create signing.properties
-        if: ${{ !inputs.debug && env.KEYSTORE != '' }}
-        run: |
-          echo KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }} > signing.properties
-          echo KEYSTORE_ALIAS=${{ secrets.KEYSTORE_ALIAS }} >> signing.properties
-          echo KEYSTORE_ALIAS_PASSWORD='${{ secrets.KEYSTORE_ALIAS_PASSWORD }}' >> signing.properties
-          echo KEYSTORE_FILE=../key.jks >> signing.properties
-          echo ${{ secrets.KEYSTORE }} | base64 --decode > key.jks
+      #- name: Create signing.properties
+        #if: ${{ !inputs.debug && env.KEYSTORE != '' }}
+        #run: |
+          #echo KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }} > signing.properties
+          #echo KEYSTORE_ALIAS=${{ secrets.KEYSTORE_ALIAS }} >> signing.properties
+          #echo KEYSTORE_ALIAS_PASSWORD='${{ secrets.KEYSTORE_ALIAS_PASSWORD }}' >> signing.properties
+          #echo KEYSTORE_FILE=../key.jks >> signing.properties
+          #echo ${{ secrets.KEYSTORE }} | base64 --decode > key.jks
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5

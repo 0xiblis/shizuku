@@ -29,8 +29,16 @@ android {
         viewBinding = true
         prefab = true
     }
-    signingConfigs {
+    /*signingConfigs {
         sign {}
+    }*/
+    signingConfigs {
+        sign {
+            storeFile = file("../test-key.jks")
+            storePassword = "testing"
+            keyAlias = "test-alias"
+            keyPassword = "testing"
+        }
     }
     buildTypes {
         debug {
@@ -205,4 +213,4 @@ dependencies {
     implementation "me.zhanghai.android.appiconloader:appiconloader:1.5.0"
 }
 
-apply from: rootProject.file("signing.gradle")
+//apply from: rootProject.file("signing.gradle")
